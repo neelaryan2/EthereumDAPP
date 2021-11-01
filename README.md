@@ -11,37 +11,8 @@ This code is strictly adapted for Windows systems.
 - [geth 1.9.3](https://gethstore.blob.core.windows.net/builds/geth-windows-amd64-1.9.3-cfbb969d.zip)
 
 ### Usage
-[TO BE FILLED]
+- Run `.\listener.ps1` in a seperate Powershell terminal. This is the listener which will process all the requests.
+- Run `python deploy.py` in a separate terminal to deploy the contract `JointAccount.sol`, the address of which will be saved in `files\contractAddressList`. This file will be used to determine the address of the contracts deployed through the aforementioned script.
+- Run `interact.py` to call the different functions of the deployed contract.
 
-<!-- 
-
-Note that we assume the version of go-ethereum is 1.9.3, solidity 0.4.25
-
-
-1. Run following command to install the requried things (if not already installed)
-sh installGo.sh
-sh installpy3.sh
-
-2.  Download the go-ethereum code and keep it in $HOME. 
-
-3. cd go-ethereum  
-   make
-
-2. Run the following command and copy the address to the genesis.json in the alloc section that adds the balance to the geth account.
-
-geth --datadir $HOME/HW3/test-eth1/ --password $HOME/HW3/password.txt account new
-
-
-3. Run the following command to set up the Ethereum node.
-
-sh runEthereumNode.sh
-
-
-4. Run the following command, which will deploy the smart contract and copy the smart contract address to contractAddressList
-
-python3 deployContract.py > contractAddressList
-
-
-5. Run the following command to send the transaction
-
-python3 sendTransaction.py -->
+**NOTE**: Importing py-solc-x prints `INFO: Could not find files for the given pattern(s).` to the terminal, which is probably harmless.
