@@ -1,18 +1,20 @@
 =============== Nov 1, 2021 (IST) ===============
-01:02:08.008223 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-01:02:08.017223 db@open opening
-01:02:08.019226 version@stat F·[] S·0B[] Sc·[]
-01:02:08.021226 db@janitor F·2 G·0
-01:02:08.021226 db@open done T·4.0032ms
-01:02:08.034224 db@close closing
-01:02:08.034224 db@close done T·0s
+15:47:01.717048 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+15:47:01.771555 db@open opening
+15:47:01.772357 version@stat F·[] S·0B[] Sc·[]
+15:47:01.821229 db@janitor F·2 G·0
+15:47:01.821229 db@open done T·49.6738ms
+15:47:01.834239 db@close closing
+15:47:01.835247 db@close done T·1.008ms
 =============== Nov 1, 2021 (IST) ===============
-01:02:08.239225 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-01:02:08.240224 version@stat F·[] S·0B[] Sc·[]
-01:02:08.240224 db@open opening
-01:02:08.240224 journal@recovery F·1
-01:02:08.242223 journal@recovery recovering @1
-01:02:08.248258 memdb@flush created L0@2 N·12 S·744B "\x02˥..@\x95-,v2":"sec..\tո,v1"
-01:02:08.251225 version@stat F·[1] S·744B[744B] Sc·[0.25]
-01:02:08.260223 db@janitor F·3 G·0
-01:02:08.260223 db@open done T·19.9995ms
+15:47:02.175533 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+15:47:02.175533 version@stat F·[] S·0B[] Sc·[]
+15:47:02.175533 db@open opening
+15:47:02.175533 journal@recovery F·1
+15:47:02.178538 journal@recovery recovering @1
+15:47:02.211118 memdb@flush created L0@2 N·12 S·744B "\x02˥..@\x95-,v2":"sec..\tո,v1"
+15:47:02.215119 version@stat F·[1] S·744B[744B] Sc·[0.25]
+15:47:02.321036 db@janitor F·3 G·0
+15:47:02.321036 db@open done T·145.5027ms
+16:58:41.720145 db@close closing
+16:58:41.721091 db@close done T·946.1µs

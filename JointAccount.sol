@@ -37,17 +37,23 @@ contract JointAccount {
         userCount++;
     }
 
-    function createAcc(
-        int256 user_id_1,
-        int256 user_id_2,
-        uint256 balance
-    ) public {
+    function getBalance(int256 uid1, int256 uid2) view public returns (uint256) {
+        for (uint32 i = 0; i < neighbours[uid1].length; i++) {
+            if (neighbours[uid1][i].user_id == uid2) {
+                return neighbours[uid1][i].balance;
+            }
+        }
+        require(false);
+        return 0;
+    }
+
+    function createAcc(int256 user_id_1, int256 user_id_2, uint256 balance) public {
         // divide balance equally in user_1 and user_2
 
         // require(msg.sender == admin);
 
-        neighbours[user_id_1].push(Edge(user_id_2, balance / 2));
-        neighbours[user_id_2].push(Edge(user_id_1, balance / 2));
+        neighbours[user_id_1].push(Edge(user_id_2, balance));
+        neighbours[user_id_2].push(Edge(user_id_1, balance));
         edgeCount += 2;
     }
 

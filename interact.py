@@ -1,59 +1,113 @@
-import sys, os, copy
-import time
-from web3 import *
-from solcx import compile_source
+from utils import *
 
 
-def compile_source_file(file_path):
-    with open(file_path, 'r') as f:
-        source = f.read()
-    return compile_source(source, solc_version='0.4.25')
+class DAPP:
+    def __init__(self):
+        self.w3 = connectWeb3()
+        self.acct = self.w3.eth.accounts[0]
+        self.gas = 2409638
+        self.contract = None
+
+    def start(self):
+        self.w3.miner.start(1)
+
+    def stop(self):
+        self.w3.miner.stop()
+
+    def fetch_contract(self, name='JointAccount'):
+        base = os.path.dirname(os.path.abspath(__file__))
+        contract_path = os.path.join(base, f'{name}.sol')
+        contract_addresses = read_contract_addresses()
+        compiled_contract = compile_source_file(contract_path)
+        contract_id, contract_interface = compiled_contract.popitem()
+        address = contract_addresses[name]
+        abi = contract_interface['abi']
+        self.contract = self.w3.eth.contract(address, abi=abi)
+
+    def get_receipt(self, txn_hash):
+        receipt = self.w3.eth.waitForTransactionReceipt(txn_hash)
+        items, hb = [], type(receipt['blockHash'])
+        for k, v in dict(receipt).items():
+            if type(v) == hb: v = v.hex()
+            if k not in ['logsBloom']:
+                items.append((k, v))
+        return json.dumps(dict(items), indent=4)
+
+    def register_user(self, uid, name):
+        txn_hash = self.contract.functions.registerUser(uid, name).transact({
+            'txType': '0x3', 
+            'from': self.acct, 
+            'gas': self.gas
+        })
+        return self.get_receipt(txn_hash)
+
+    def create_account(self, uid1, uid2, balance):
+        txn_hash = self.contract.functions.createAcc(uid1, uid2, balance).transact({
+            'txType': '0x3', 
+            'from': self.acct, 
+            'gas': self.gas
+        })
+        return self.get_receipt(txn_hash)
+
+    def send_amount(self, uid1, uid2, amt):
+        txn_hash = self.contract.functions.sendAmount(uid1, uid2, amt).transact({
+            'txType': '0x3', 
+            'from': self.acct, 
+            'gas': self.gas
+        })
+        return self.get_receipt(txn_hash)
+
+    def close_account(self, uid1, uid2):
+        txn_hash = self.contract.functions.closeAccount(uid1, uid2).transact({
+            'txType': '0x3', 
+            'from': self.acct, 
+            'gas': self.gas
+        })
+        return self.get_receipt(txn_hash)
+
+    def get_balance(self, uid1, uid2):
+        return self.contract.functions.getBalance(uid1, uid2).call(block_identifier='latest')
 
 
-def read_contract_addresses():
-    file = os.path.join('files', 'contractAddressList')
-    with open(file, 'r') as fp:
-        lines = [l.strip() for l in fp if l.strip()]
-    return dict([l.split(':') for l in lines])
+def execute(dapp):
+    print(dapp.register_user(1, 'User1'))
+    print(dapp.register_user(2, 'User2'))
+    print(dapp.create_account(1, 2, 3))
+    # print(dapp.get_balance(1, 2))
+    print(dapp.send_amount(1, 2, 5))
+    print(dapp.close_account(1, 2))
 
 
-def connectWeb3():
-    return Web3(HTTPProvider('http://127.0.0.1:1558'))
+def execute2(dapp, seed=42):
+    users, edges = user_network(nodes=100, edges=500, seed=42)
+    random.seed(42)
+    
+    for i, uid in enumerate(users):
+        dapp.register_user(uid, f'User{i + 1}')
+    
+    for u1, u2, balance in edges:
+        dapp.create_account(u1, u2, balance)
+
+    successes = [None for _ in range(1000)]
+    for t in range(len(successes)):
+        u1, u2 = random.choices(users, k=2)
+        dapp.send_amount(u1, u2, 1)
+
+    for u1, u2, balance in edges:
+        dapp.close_account(u1, u2)
 
 
-def sendEmptyLoopTransaction(address):
-    compiled_sol = copy.deepcopy(compiled_contract)
-    contract_id, contract_interface = compiled_sol.popitem()
-    contract_obj = w3.eth.contract(address=address, abi=contract_interface['abi'])
-    tx_hash = contract_obj.functions.runLoop(-123).transact({
-        'txType': '0x3', 
-        'from': w3.eth.accounts[0], 
-        'gas': 2409638
-    })
-    return tx_hash
+def main():
+    dapp = DAPP()
+    try:
+        dapp.start()
+        dapp.fetch_contract()
+        execute(dapp)
+    except Exception as e:
+        raise e
+    finally:
+        dapp.stop()
 
 
-def getReceipt(txn_hash):
-    receipt = w3.eth.getTransactionReceipt(txn_hash)
-    while receipt is None:
-        time.sleep(0.1)
-        receipt = w3.eth.getTransactionReceipt(txn_hash)
-    return receipt
-
-
-base = os.path.dirname(os.path.abspath(__file__))
-contract = os.path.join(base, 'emptyLoop.sol')
-contract_name = os.path.basename(contract)[:-4]
-compiled_contract = compile_source_file(contract)
-
-w3 = connectWeb3()
-contract_addresses = read_contract_addresses()
-
-print("Starting Transaction Submission")
-w3.miner.start(1)
-address = contract_addresses[contract_name]
-txn_hash = sendEmptyLoopTransaction(address)
-receipt = getReceipt(txn_hash)
-print(receipt)
-
-w3.miner.stop()
+if __name__ == '__main__':
+    main()
