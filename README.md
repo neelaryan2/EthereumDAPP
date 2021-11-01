@@ -4,7 +4,7 @@
 
 This code is strictly adapted for Windows systems.
 ### Requirements
-- [python](https://www.python.org/downloads/) ( recommended >= 3.6)
+- [python](https://www.python.org/downloads/) (recommended >= 3.6)
 - [py-sol-cx](https://pypi.org/project/py-solc-x/) 
    - solc version 0.4.25 (refer this [link](https://solcx.readthedocs.io/en/latest/version-management.html?highlight=precompiled#installing-precompiled-binaries))
 - [web3](https://pypi.org/project/web3/)
