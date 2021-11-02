@@ -22,7 +22,7 @@ def getGas(lines):
 
 functions = ['registerUser', 'createAcc', 'sendAmount', 'closeAccount']
 
-with open('run.log.backup', 'r') as fp:
+with open('run.log', 'r') as fp:
     lines = [l.strip() for l in fp]
 
 getGas(lines)

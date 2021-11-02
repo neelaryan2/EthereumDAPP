@@ -2,7 +2,6 @@ import sys, os, copy
 import time, random
 from web3 import *
 from solcx import compile_source
-import json
 import argparse
 
 
