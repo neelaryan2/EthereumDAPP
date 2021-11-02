@@ -3,6 +3,7 @@ import time, random
 from web3 import *
 from solcx import compile_source
 import json
+import argparse
 
 
 def compile_source_file(file_path):
@@ -22,23 +23,45 @@ def read_contract_addresses():
     return dict([l.split(':') for l in lines])
 
 
-def get_receipt(w3, txn_hash, timeout=120):
-        time.sleep(0.01)
-        try:
-            receipt = w3.eth.waitForTransactionReceipt(txn_hash, timeout=timeout)
-        except Exception as e:
-            w3.miner.stop()
-            raise e
-        items, hb = [], type(receipt['blockHash'])
-        for k, v in dict(receipt).items():
-            if type(v) == hb: v = v.hex()
-            if k not in ['logsBloom']:
-                items.append((k, v))
-        return dict(items)
+def format_dict(obj):
+    items, hb = [], type(obj['blockHash'])
+    for k, v in dict(obj).items():
+        if type(v) == hb: v = v.hex()
+        if k not in ['logsBloom', 'input']:
+            items.append((k, v))
+    return dict(items)
+
+
+def check_txn(w3, receipt):
+    # https://ethereum.stackexchange.com/questions/6002/transaction-status
+    txn_hash = receipt['transactionHash']
+    txn_hash = bytes.fromhex(txn_hash[2:])
+    txn = w3.eth.getTransaction(txn_hash)
+    gas = int(txn['gas'])
+    gas_used = int(receipt['gasUsed'])
+    return (gas_used < gas)
+
+
+def get_receipt(w3, txn_hash, tries=50, latency=0.1):
+    for t in range(tries):
+        receipt = w3.eth.getTransactionReceipt(txn_hash)  
+        if receipt is not None:
+            break
+        time.sleep(latency)
+        if t == tries // 2:
+            latency *= 2
+
+    if receipt is None:
+        w3.miner.stop()
+        raise Exception('Could not fetch receipt')
+    else:
+        return format_dict(receipt)
 
 
 def graph_structure(nodes, edges, seed=42):
-    assert edges >= nodes - 1
+    mx = (nodes * (nodes - 1)) // 2
+    mn = nodes - 1
+    assert mx >= edges >= nodes - 1, f'Number of edges ({edges}) should be in [{mn}, {mx}]'
     random.seed(seed)
     idx = list(range(nodes))
     degrees = [0 for _ in idx]
@@ -83,17 +106,18 @@ def user_network(nodes, edges, seed=42):
         edges = graph_structure(nodes, edges, seed)
     random.seed(seed)
 
-    user_ids, so_far = [], set()
-    for _ in range(nodes):
-        uid = random.getrandbits(256)
-        while uid in so_far:
-            uid = random.getrandbits(256)
-        user_ids.append(uid)
-        so_far.add(uid)
+    # user_ids, so_far = [], set()
+    # for _ in range(nodes):
+    #     uid = random.getrandbits(256)
+    #     while uid in so_far:
+    #         uid = random.getrandbits(256)
+    #     user_ids.append(uid)
+    #     so_far.add(uid)
+    user_ids = list(range(1, nodes + 1))
 
     amounts = [round(random.expovariate(lambd=1/10) / 2) for _ in edges]
     edges = [(user_ids[a], user_ids[b], amt) for (a, b), amt in zip(edges, amounts)]
     return user_ids, edges
     
 if __name__ == '__main__':
-    print(user_network(4, 5, 42))
+    print(user_network(10, 50, 42))

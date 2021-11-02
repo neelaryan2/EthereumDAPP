@@ -16,7 +16,10 @@ def deployTxn(contract_source_path, w3, account):
 def deployContract(source_path, w3, account, file):
     tx_hash = deployTxn(source_path, w3, account)
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    assert receipt is not None, 'Contract not deployed'
+    receipt = format_dict(receipt)
+    if not check_txn(w3, receipt):
+        w3.miner.stop()
+        raise Exception('Contract not deployed')
     name = os.path.basename(source_path)[:-4]
     address = receipt['contractAddress']
     print(f'{name}:{address}', file=file, flush=True)
