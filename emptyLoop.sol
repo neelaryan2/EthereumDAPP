@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.25;
 
 contract Sorter {
     uint256 public loopVar;
@@ -7,10 +7,11 @@ contract Sorter {
         loopVar = 50 * 50;
     }
 
-    function runLoop() public view {
+    function runLoop(uint256 v) view public returns (uint256) {
         uint256 a = 0;
-        for (uint256 i = 0; i < loopVar; i++) {
+        for (uint256 i = 0; i < v; i++) {
             a++;
         }
+        return a;
     }
 }

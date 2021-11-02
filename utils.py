@@ -22,6 +22,21 @@ def read_contract_addresses():
     return dict([l.split(':') for l in lines])
 
 
+def get_receipt(w3, txn_hash, timeout=120):
+        time.sleep(0.01)
+        try:
+            receipt = w3.eth.waitForTransactionReceipt(txn_hash, timeout=timeout)
+        except Exception as e:
+            w3.miner.stop()
+            raise e
+        items, hb = [], type(receipt['blockHash'])
+        for k, v in dict(receipt).items():
+            if type(v) == hb: v = v.hex()
+            if k not in ['logsBloom']:
+                items.append((k, v))
+        return dict(items)
+
+
 def graph_structure(nodes, edges, seed=42):
     assert edges >= nodes - 1
     random.seed(seed)
@@ -67,11 +82,18 @@ def user_network(nodes, edges, seed=42):
     if isinstance(edges, int):
         edges = graph_structure(nodes, edges, seed)
     random.seed(seed)
-    user_ids = [random.getrandbits(256) for _ in range(nodes)]
-    amounts = [round(random.expovariate(lambd=1/10)) // 2 for _ in edges]
+
+    user_ids, so_far = [], set()
+    for _ in range(nodes):
+        uid = random.getrandbits(256)
+        while uid in so_far:
+            uid = random.getrandbits(256)
+        user_ids.append(uid)
+        so_far.add(uid)
+
+    amounts = [round(random.expovariate(lambd=1/10) / 2) for _ in edges]
     edges = [(user_ids[a], user_ids[b], amt) for (a, b), amt in zip(edges, amounts)]
     return user_ids, edges
-
-
+    
 if __name__ == '__main__':
     print(user_network(4, 5, 42))

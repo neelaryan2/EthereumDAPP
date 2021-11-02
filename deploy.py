@@ -8,8 +8,7 @@ def deployTxn(contract_source_path, w3, account):
         bytecode=contract_interface['bin']
     ).constructor().transact({
         'txType': '0x0', 
-        'from': account, 
-        'gas': 1000000
+        'from': account
     })
     return tx_hash
 

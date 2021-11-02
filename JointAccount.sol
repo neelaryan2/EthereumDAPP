@@ -1,16 +1,15 @@
 pragma solidity ^0.4.25;
 
-// TODO : Verify if only the admin can call the four functions
+// TODO : Verify if only the owner can call the four functions
 
 contract JointAccount {
-    address private admin;
 
     struct Edge {
         uint256 to;
         uint256 balance;
     }
 
-    uint256 bad;
+    address private owner;
     uint256[] private user_ids;
     uint256[] private queue;
     
@@ -20,23 +19,17 @@ contract JointAccount {
     mapping(uint256 => bool) private visited;
     mapping(uint256 => uint256) private parent;
     
-    
     constructor() public {
-        bad = 2**256 - 1;
-        admin = msg.sender;
+        owner = msg.sender;
     }
 
     function registerUser(uint256 user_id, string user_name) public {
-        // require(msg.sender == admin, "You do not have access to this function.");
-        
-        if (!used[user_id]) {
-            used[user_id] = true;
-            visited[user_id] = false;
-            name[user_id] = user_name;
-            user_ids.push(user_id);
-        } else {
-            require(false, "User ID already exists.");
-        }
+        // require(msg.sender == owner, "Only contract owner can access this function.");
+        require(!used[user_id], "User ID already exists.");
+
+        used[user_id] = true;
+        name[user_id] = user_name;
+        user_ids.push(user_id);
     }
 
     function checkEdge(uint256 uid1, uint256 uid2) view private returns (bool) {
@@ -60,7 +53,7 @@ contract JointAccount {
     }
     
     function getBalance(uint256 uid1, uint256 uid2) view public returns (uint256, uint256) {
-        // require(msg.sender == admin, "You do not have access to this function.");
+        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(checkEdge(uid1, uid2), "Users are not connected.");
         
         uint256 a;
@@ -79,16 +72,16 @@ contract JointAccount {
     }
 
     function createAcc(uint256 uid1, uint256 uid2, uint256 balance) public {
-        // require(msg.sender == admin, "You do not have access to this function.");
+        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(!checkEdge(uid1, uid2), "Users already have an account.");
+
         adj[uid1].push(Edge(uid2, balance));
         adj[uid2].push(Edge(uid1, balance));
     }
 
+    // send amount from uid1 to uid2 if possible
     function sendAmount(uint256 uid1, uint256 uid2, uint256 amount) public {
-        // send amount from user_1 to user_2 if possible
-
-        // require(msg.sender == admin, "You do not have access to this function.");
+        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(used[uid1] && used[uid2], "User does not exist");
 
         // stack variables
@@ -98,11 +91,8 @@ contract JointAccount {
         uint256 u;
         
         // reset from past runs
-        for (i = 0; i < user_ids.length; i++) {
-            j = user_ids[i];
-            visited[j] = false;
-            parent[j] = bad;
-        }
+        for (i = 0; i < user_ids.length; i++)
+            visited[user_ids[i]] = false;
         delete queue;
 
         // initialise
@@ -128,7 +118,7 @@ contract JointAccount {
         }
         
         // reachability
-        require(parent[uid2] != bad, "No viable path exists between these users.");
+        require(visited[uid2], "No viable path exists between these users.");
         
         // path update
         v = uid2;
@@ -172,7 +162,7 @@ contract JointAccount {
     }
 
     function closeAccount(uint256 uid1, uint256 uid2) public {
-        // require(msg.sender == admin, "You do not have access to this function.");
+        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(checkEdge(uid1, uid2), "Users are not connected.");
 
         removeNeighbour(uid1, uid2);
