@@ -4,7 +4,7 @@
 
 ### Requirements
 - [python](https://www.python.org/downloads/) (recommended >= 3.6)
-- [py-sol-cx](https://pypi.org/project/py-solc-x/) 
+- [py-solc-x](https://pypi.org/project/py-solc-x/) 
    - solc version 0.4.25 (refer this [link](https://solcx.readthedocs.io/en/latest/version-management.html?highlight=precompiled#installing-precompiled-binaries))
 - [web3](https://pypi.org/project/web3/)
 - [geth 1.9.3](https://geth.ethereum.org/downloads/) (Windows or Linux binary)
