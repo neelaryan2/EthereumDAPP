@@ -1,4 +1,6 @@
 from collections import defaultdict
+import os, sys
+from glob import glob
 
 import matplotlib
 matplotlib.use('Agg')
@@ -6,33 +8,61 @@ from matplotlib import style
 style.use('ggplot')
 import matplotlib.pyplot as plt
 
+functions = ['registerUser', 'createAcc', 'sendAmount', 'closeAccount']
+
+def parse(line):
+    line = [l.split(': ') for l in line.split('  ')]
+    call, status = line.pop(0)
+    function, args = call.split('(')
+    args = eval('(' + args)
+    ret = {'function': function, 'args':args, 'status':status}
+    for k, v in line:
+        ret[k] = v
+    return ret
+
 def getGas(lines):
     gases = defaultdict(lambda: [])
-    for l in lines:
-        for function in functions:
-            if l.startswith(function):
-                l1, l2 = l.split('  ')
-                status = l1.split(': ')[1]
-                gas = int(l2.split(': ')[1])
-                if status == 'SUCCESS':
-                    gases[function].append(gas)
+    for row in lines:
+        function = row['function']
+        gas = int(row['gasUsed'])
+        if row['status'] == 'SUCCESS':
+            gases[function].append(gas)
 
     for function, gas in gases.items():
         print(function, max(gas), sep=': ')
 
-functions = ['registerUser', 'createAcc', 'sendAmount', 'closeAccount']
 
-with open('run.log', 'r') as fp:
-    lines = [l.strip() for l in fp]
+def plot(y):
+    image_file = os.path.join('output', 'plot.png')
+    fig = plt.figure(dpi=300)
+    plt.plot(y)
+    plt.xlabel('Number')
+    plt.ylabel('Success Ratio')
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
+
+folder = 'output'
+
+if len(sys.argv) <= 1:
+    logfile = os.path.join(folder, 'run.log')
+    max_counter = -1
+    for file in glob(os.path.join(folder, 'run_*.log')):
+        counter = int(file.split('_')[-1][:-4])
+        if counter >  max_counter:
+            max_counter = counter
+            logfile = file
+else:
+    logfile = os.path.join(folder, sys.argv[1])
+
+with open(logfile, 'r') as fp:
+    lines = [parse(l.strip()) for l in fp if l.strip()]
 
 getGas(lines)
 
 values = []
 for l in lines:
-    if l.startswith(functions[2]):
-        l1, l2 = l.split('  ')
-        status = l1.split(': ')[1]
-        status = int(status == 'SUCCESS')
+    if l['function'] == functions[2]:
+        status = int(l['status'] == 'SUCCESS')
         values.append(status)
 
 step = 100
@@ -46,9 +76,4 @@ for i in range(0, len(values), step):
     # cur = success / size
     y.append(cur)
 
-fig = plt.figure(dpi=300)
-plt.plot(y)
-plt.xlabel('Number')
-plt.ylabel('Success Ratio')
-plt.savefig('plot.png', bbox_inches='tight')
-plt.close()
+plot(y)

@@ -1,5 +1,6 @@
 from utils import *
 
+
 def deployTxn(contract_source_path, w3, account):
     compiled_sol = compile_source_file(contract_source_path)
     contract_id, contract_interface = compiled_sol.popitem()
@@ -16,8 +17,7 @@ def deployTxn(contract_source_path, w3, account):
 def deployContract(source_path, w3, account, file):
     tx_hash = deployTxn(source_path, w3, account)
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    receipt = format_dict(receipt)
-    if not check_txn(w3, receipt):
+    if check_txn(w3, receipt) == 'FAILURE':
         w3.miner.stop()
         raise Exception('Contract not deployed')
     name = os.path.basename(source_path)[:-4]
@@ -32,7 +32,6 @@ def deploy():
     w3.miner.start(1)
     with open(os.path.join('files', 'contractAddressList'), 'w') as fp:
         deployContract('JointAccount.sol', w3, w3.eth.accounts[0], fp)
-        # deployContract('emptyLoop.sol', w3, w3.eth.accounts[0], fp)
     w3.miner.stop()
 
 
