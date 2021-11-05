@@ -20,10 +20,12 @@ Type "help", "copyright", "credits" or "license" for more information.
 Version('0.4.25')
 ```
 
+**NOTE**: In case of windows, we use HTTPProvider to connect to the RPC endpoint provided by Geth, even though the docs clearly state that IPCProvider is faster because it uses the local filesystem. This is because Geth on windows stores `geth.ipc` as a Windows Named Pipe as `.\pipe\geth.ipc`, which does not support multiple connections and has a latency after each connection. In case of Linux, we use the standard IPCProvider, as `geth.ipc` is available as a normal socket file.
+
 ### Usage
 It is assumed that the `geth` (or `geth.exe`) binary is placed at the base directory of this repository, which is also the working directory for any of the scripts.
 - Run `.\runEthereumNode.ps1` or `./runEthereumNode.sh` (depending on your OS) in a seperate terminal. This is the listener which will process all the requests.
-- Run `python deployContract.py` in a separate terminal to deploy the contract `JointAccount.sol`, the address of which will be saved in `files\contractAddressList`. This file will be used to determine the address of the contracts deployed through the aforementioned script.
+- Run `python deployContract.py` in a separate terminal to deploy the contract `JointAccount.sol`, the address of which will be saved in `files/contractAddressList`. This file will be used to determine the address of the contracts deployed through the aforementioned script.
 - Run `python sendTransactions.py` to call the different functions and perform any analysis on the deployed contract. Running this file will produce a log of creation and mining of every transaction generated, in the file `output/run_{}.log`.
 ```
 usage: python sendTransactions.py [-h] [-u USERS] [-a ACCOUNTS] [-t TXNS] [-s SEED]
@@ -37,4 +39,4 @@ optional arguments:
 ```
 - Run `python plot.py <filename>` which will produce the desired plot sand save it to `output/plot.png`, using the `output/<filename>` file.
 
-**NOTE**: While running in WSL (or possibly in other VMs), do not place this repository in the **mounted** filesystems. Geth is known to have issues with filesystem metadata associated with mounted directories ([issue](https://github.com/Microsoft/WSL/issues/2137)).
+**NOTE**: While running in WSL (or possibly in other VMs), do not place this repository in the **mounted** (`/mnt/`) filesystems. Bind operation in WSL is known to have issues with DrvFS filesystem metadata associated with mounted directories ([issue](https://github.com/Microsoft/WSL/issues/2137)).

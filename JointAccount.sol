@@ -107,12 +107,10 @@ contract JointAccount {
                 break;
             for (j = 0; j < adj[v].length; j++) {
                 u = adj[v][j].to;
-                if (!visited[u]) {
+                if (!visited[u] && adj[v][j].balance >= amount) {
                     visited[u] = true;
-                    if (adj[v][j].balance >= amount) {
-                        queue.push(u);
-                        parent[u] = v;
-                    }
+                    parent[u] = v;
+                    queue.push(u);
                 }
             }
         }

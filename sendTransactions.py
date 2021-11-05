@@ -19,7 +19,7 @@ class DAPP:
             'registerUser': 150000,
             'createAcc': 200000,
             'sendAmount': 10000000,
-            'closeAccount': 1000000
+            'closeAccount': 1200000
         }
 
     def setup_log(self):
@@ -100,23 +100,27 @@ def register_users(dapp, users):
     dapp.mine()
 
 
-def analysis(dapp, users, edges, txns, seed):
-    random.seed(seed)
-    
+def create_accounts(dapp, edges):
     for u1, u2, balance in edges:
         dapp.createAcc(u1, u2, balance)
     dapp.mine()
 
+
+def close_accounts(dapp, edges):
+    for u1, u2, balance in edges:
+        dapp.closeAccount(u1, u2)
+    dapp.mine()
+
+
+def send_amounts(dapp, users, txns, seed):
+    random.seed(seed)
+    
     successes = []
     for t in range(txns):
         u1, u2 = random.sample(users, k=2)
         dapp.sendAmount(u1, u2, 1)
         success = dapp.mine()[0]
         successes.append(success)
-
-    for u1, u2, balance in edges:
-        dapp.closeAccount(u1, u2)
-    dapp.mine()
 
     return successes
 
@@ -129,8 +133,9 @@ def main(dapp, args):
 
     users, edges = user_network(nodes=nodes, edges=edges, seed=seed)
     register_users(dapp, users)
-    successes = analysis(dapp, users, edges, txns, seed)
-    return successes
+    create_accounts(dapp, edges)
+    successes = send_amounts(dapp, users, txns, seed)
+    close_accounts(dapp, edges)
 
 
 if __name__ == '__main__':
