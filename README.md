@@ -37,6 +37,6 @@ optional arguments:
 -t TXNS, --txns TXNS              Number of sendAmount transactions. (default: 1000)
 -s SEED, --seed SEED              Seed to fix randomness. (default: 42)
 ```
-- Run `python plot.py <filename>` which will produce the desired plot sand save it to `output/plot.png`, using the `output/<filename>` file.
+- Run `python plot.py <filename>` which will produce the desired plot , saving it to `output/plot.png`, using the `output/<filename>` file. It will also print (to STDOUT) a summary of the ratio of successful transactions to total transactions.
 
 **NOTE**: While running in WSL (or possibly in other VMs), do not place this repository in the **mounted** (`/mnt/`) filesystems. Bind operation in WSL is known to have issues with DrvFS filesystem metadata associated with mounted directories ([issue](https://github.com/Microsoft/WSL/issues/2137)).

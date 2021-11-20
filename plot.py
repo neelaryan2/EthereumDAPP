@@ -32,11 +32,11 @@ def getGas(lines):
         print(function, max(gas), sep=': ')
 
 
-def plot(y):
+def plot(x, y):
     image_file = os.path.join('output', 'plot.png')
     fig = plt.figure(dpi=300)
-    plt.plot(y)
-    plt.xlabel('Number')
+    plt.plot(x, y)
+    plt.xlabel('Number of txns')
     plt.ylabel('Success Ratio')
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
@@ -67,13 +67,16 @@ for l in lines:
 
 step = 100
 success, size = 0, 0
-y = []
+x, y = [], []
+print('Successful transaction summary')
+print('success_txn\ttotal_txn\tratio')
 for i in range(0, len(values), step):
-    chunk = values[i:i + step]
-    success += sum(chunk)
-    size += len(chunk)
-    cur = sum(chunk) / len(chunk)
-    # cur = success / size
+    chunk = values[:i + step]
+    success = sum(chunk)
+    size = len(chunk)
+    cur = success / size
     y.append(cur)
+    x.append(size)
+    print('%s\t\t%s\t\t%.4f' % (success, size, cur))
 
-plot(y)
+plot(x, y)

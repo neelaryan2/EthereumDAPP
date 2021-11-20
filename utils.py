@@ -94,17 +94,21 @@ def graph_structure(nodes, edges, seed=42):
     T.add(n1); T.add(n2)
     add_edge(n1, n2)
 
+    ## first create connected graph
     while len(S) > 0:
         next_node = random.choice(idx)
         if next_node not in T:
+            ## randomly sample node with probability proportional to degree
             neighbour_node = random.choices(idx, weights=degrees)[0]
             while neighbour_node == next_node:
                 neighbour_node = random.choices(idx, weights=degrees)[0]
             S.remove(next_node); T.add(next_node)
             add_edge(next_node, neighbour_node)
 
+    ## add extra edges
     while edges > 0:
         next_node = random.choice(idx)
+        ## randomly sample node with probability proportional to degree
         neighbour_node = random.choices(idx, weights=degrees)[0]
         while neighbour_node == next_node:
             neighbour_node = random.choices(idx, weights=degrees)[0]
@@ -118,15 +122,8 @@ def user_network(nodes, edges, seed=42):
         edges = graph_structure(nodes, edges, seed)
     random.seed(seed)
 
-    # user_ids, so_far = [], set()
-    # for _ in range(nodes):
-    #     uid = random.getrandbits(256)
-    #     while uid in so_far:
-    #         uid = random.getrandbits(256)
-    #     user_ids.append(uid)
-    #     so_far.add(uid)
     user_ids = list(range(1, nodes + 1))
-
+    ## randomly initialize amounts
     amounts = [round(random.expovariate(lambd=1/10) / 2) for _ in edges]
     edges = [(user_ids[a], user_ids[b], amt) for (a, b), amt in zip(edges, amounts)]
     return user_ids, edges

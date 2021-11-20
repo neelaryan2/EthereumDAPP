@@ -48,12 +48,6 @@ class DAPP:
         assert self.w3.eth.getCode(self.contract.address), 'Contract address is empty'
 
     def estimate_gas(self, name, function, args):
-        # try:
-        #     old_gas = self.txn_params.pop('gas', self.default_gas)
-        #     gas = function(*args).estimateGas(self.txn_params)
-        #     gas += 100000
-        # except ValueError as e:
-        #     gas = self.default_gas
         gas = self.gas_estimates[name]
         self.txn_params.update(gas=gas)
 
@@ -141,7 +135,7 @@ def main(dapp, args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-u', '--users', type=int, default=100, help='Number of users to be registered.')
-    parser.add_argument('-a', '--accounts', type=int, default=500, help='Number of joint accounts.')
+    parser.add_argument('-a', '--accounts', type=int, default=300, help='Number of joint accounts.')
     parser.add_argument('-t', '--txns', type=int, default=1000, help='Number of sendAmount transactions.')
     parser.add_argument('-s', '--seed', type=int, default=42, help='Seed to fix randomness.')
     args = parser.parse_args()

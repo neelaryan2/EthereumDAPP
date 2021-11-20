@@ -1,7 +1,5 @@
 pragma solidity ^0.4.25;
 
-// TODO : Verify if only the owner can call the four functions
-
 contract JointAccount {
 
     struct Edge {
@@ -24,7 +22,6 @@ contract JointAccount {
     }
 
     function registerUser(uint256 user_id, string user_name) public {
-        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(!used[user_id], "User ID already exists.");
 
         used[user_id] = true;
@@ -36,6 +33,8 @@ contract JointAccount {
         require(used[uid1] && used[uid2], "User does not exist");
         uint256 i;
         bool found = false;
+        
+        // check presence of edge in adjacency matrix
         
         for (i = 0; i < adj[uid1].length; i++)
             if (adj[uid1][i].to == uid2)
@@ -53,12 +52,13 @@ contract JointAccount {
     }
     
     function getBalance(uint256 uid1, uint256 uid2) view public returns (uint256, uint256) {
-        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(checkEdge(uid1, uid2), "Users are not connected.");
         
         uint256 a;
         uint256 b;
         uint256 i;
+
+        // get balances from adjacency matrix if edge exists
 
         for (i = 0; i < adj[uid1].length; i++)
             if (adj[uid1][i].to == uid2)
@@ -72,16 +72,15 @@ contract JointAccount {
     }
 
     function createAcc(uint256 uid1, uint256 uid2, uint256 balance) public {
-        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(!checkEdge(uid1, uid2), "Users already have an account.");
 
+        // update adj matrix
         adj[uid1].push(Edge(uid2, balance));
         adj[uid2].push(Edge(uid1, balance));
     }
 
     // send amount from uid1 to uid2 if possible
     function sendAmount(uint256 uid1, uint256 uid2, uint256 amount) public {
-        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(used[uid1] && used[uid2], "User does not exist");
 
         // stack variables
@@ -160,7 +159,6 @@ contract JointAccount {
     }
 
     function closeAccount(uint256 uid1, uint256 uid2) public {
-        // require(msg.sender == owner, "Only contract owner can access this function.");
         require(checkEdge(uid1, uid2), "Users are not connected.");
 
         removeNeighbour(uid1, uid2);
